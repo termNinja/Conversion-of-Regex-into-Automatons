@@ -1,0 +1,17 @@
+digraph finite_state_machine {
+	rankdir=LR;
+	size="8,5"
+	node [shape = doublecircle]; 1;
+	node [shape = circle];
+	"0" -> "2"
+	"2" -> "4"
+	"4" -> "5" [label="vidi"];
+	"5" -> "3"
+	"3" -> "1"
+	"2" -> "6"
+	"6" -> "7" [label="ovu"];
+	"7" -> "3"
+	"0" -> "8"
+	"8" -> "9" [label="macku"];
+	"9" -> "1"
+}
