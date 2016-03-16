@@ -1,0 +1,21 @@
+# -----------------------------------------------------------------------------
+# Project Nova git ignore
+# -----------------------------------------------------------------------------
+
+# compiled 
+project_nova
+
+# object files
+*.o
+
+# vim undo files
+*.un~
+
+# swp files
+*.swp
+
+# you complete me flags
+.ycm_extra_conf*
+
+# pyc
+*.pyc
