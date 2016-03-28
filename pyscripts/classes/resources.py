@@ -35,7 +35,6 @@ class xdebug:
 # I changed type of end_node into STRING type, if error occurs BEFORE determinisation,
 # make sure to check it wasn't caused by this
 # -----------------------------------------------------------------------------
-#
 class Edge:
     def __init__(self, end_node, weight):
         self.end_node = str(end_node)
@@ -53,8 +52,6 @@ class Edge:
     def __hash__(self):
         return hash(self.end_node) ^ hash(self.weight)
 # -----------------------------------------------------------------------------
-# *****************************************************************************
-# -----------------------------------------------------------------------------
 class Node:
     def __init__(self, node_val, is_ending):
         self.node_val = int(node_val)
@@ -65,12 +62,11 @@ class Node:
             return "(" + str(self.node_val) + ")" 
         else:
             return str(self.node_val)
-# -----------------------------------------------------------------------------
-# *****************************************************************************
-# -----------------------------------------------------------------------------
 # When reading thomhpson's graph from .gv file, we KNOW that
 # node 1 is ENDING state, because that's how Thompson's algorithm was implemented.
+# -----------------------------------------------------------------------------
 class Graph:
+    # -------------------------------------------------------------------------
     def __init__(self, graph_map, graph_name):
         self.graph_map = {}
         self.graph_name = graph_name
@@ -78,11 +74,13 @@ class Graph:
         for ending_node in self.ending_nodes:
             self.graph_map[ending_node] = []
 
+    # -------------------------------------------------------------------------
     def __str__(self):
         output = str(self.graph_name) + "\n-----------------------------\n"
         output += str(self.graph_map)
         return output
 
+    # -------------------------------------------------------------------------
     def form_graph_from_gv(self):
         print "reading graph: " + self.graph_name
         f = open("../graphs/" + self.graph_name, "r")
@@ -125,12 +123,10 @@ class Graph:
                 self.graph_map[node.node_val].append(edge)
 
         ## TODO remove this, i've put it for testing purposes
-        # self.export_as_gv()
-        # self.export_as_pdf(2)
         self.elim_eps()
         self.determinize()
-        # -----------------------------------------------------------------------------------------
 
+    # -------------------------------------------------------------------------
     def export_as_gv(self): 
         output_text = []
         output_text.append("digraph finite_state_machine {\n")
@@ -162,6 +158,7 @@ class Graph:
         f.write("".join(output_text))
         f.close()
 
+    # -------------------------------------------------------------------------
     # Export graph structure as pdf
     # command is:
     # dot -Tpdf ../../graphs/source_file.gv -o ../../graphs/output.pdf
@@ -184,6 +181,7 @@ class Graph:
         return 1
 
 
+    # -------------------------------------------------------------------------
     def elim_eps(self):
         print
         print "starting eps elimination:"
@@ -227,10 +225,6 @@ class Graph:
                     self.solve_eps_prob(int(adj.end_node), int(adj.end_node), new_map, visited, ending_nodes)
     # -------------------------------------------------------------------------
 
-    # -------------------------------------------------------------------------
-    # TODO: Next to work on
-    # TODO: -> I got a bit carried away, write this code all over again,
-    #   but please, extract into functions next time
     # -------------------------------------------------------------------------
     def determinize(self):
         # we switch to string keys because of new states
@@ -290,6 +284,7 @@ class Graph:
             new_node = "".join(new_node)[0:-1]  # cut , at the end
             xdebug.info("formed string: " + new_node)
 
+            # TODO: Del this later
                 ## forming edge if required after loop
                 # xdebug.warn("elem: " + str(elem))
                 # if elem in self.graph_map:
@@ -307,9 +302,6 @@ class Graph:
             if not current_node in new_map:
                 new_map[current_node] = set()
             new_map[current_node].add((weight, elem))
-
-
-
 
             ## now we check if new_node is in new_map.keys(),
             ## if so, we ignore it, if not, we add it into queue and update
@@ -336,6 +328,7 @@ class Graph:
         xdebug.dbg("Done conversion: " + str(res))
         print
         return res
+
     # ----------------------------------------------------------------------
     # "1,2,3" => [1, 2, 3]
     # ----------------------------------------------------------------------
@@ -345,7 +338,7 @@ class Graph:
         else:
             nodestr = nodestr.split(",")
         return nodestr
-    # ----------------------------------------------------------------------
+
     # ----------------------------------------------------------------------
     # Used by method: determinize
     # ----------------------------------------------------------------------
@@ -386,6 +379,7 @@ class Graph:
                 self.graph_map[node].append(Edge(edge[1], edge[0]))
 
             # finding ending nodes
+            # TODO: Fix ending nodes
             nodes = self.convert_string_nodes_to_list(node)
             xdebug.info("str->lst: nodes: " + str(nodes))
             for xnode in nodes:
@@ -398,15 +392,19 @@ class Graph:
         self.show_graph()
     # ----------------------------------------------------------------------
 
+    # ----------------------------------------------------------------------
     def show_graph(self):
         for node in self.graph_map.keys():
             print node
             for edge in self.graph_map[node]:
                 print " -> " + str(edge)
 
+    # ----------------------------------------------------------------------
     def break_info_nodes(nodes):
         return nodes.split(",")[0:-1]
 
+    # ----------------------------------------------------------------------
+    # TODO: Nexto to implement
     def minimize():
         return 1
 # -----------------------------------------------------------------------------
