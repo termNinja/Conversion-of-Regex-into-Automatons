@@ -30,6 +30,7 @@ _TREENODE* mem_map = NULL;
 
 %left '|'
 %right '*' '+'
+%left '.'
 
 %%
 Program	: Program Command ';'
@@ -122,6 +123,19 @@ E 	:	E '+' {
 }
 	| '(' E ')' {
 	$$ = $2;
+}
+	| E '.' E {
+	_REGEX obj;
+	_REGNODE* root;
+
+	// We alloc a new node
+	root = regnode_new_node(".");
+
+	// Connect $1 and $3 to it
+	root->left = $1.regex;
+	root->right = $3.regex;
+	obj.regex = root;
+	$$ = obj;
 }
 	| id_token {
 	_TREENODE* pointer = tree_find(mem_map, $1);

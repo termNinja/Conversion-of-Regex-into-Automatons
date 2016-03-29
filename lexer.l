@@ -36,7 +36,7 @@ thompson {
 	return thompson_token;
 }
 
-[*+|():=;] {
+[*+|():.=;] {
 	return *yytext;
 }
 

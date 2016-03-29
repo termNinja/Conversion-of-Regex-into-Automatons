@@ -128,6 +128,27 @@ void create_thompson_construction_(_REGNODE* tree)
 		create_thompson_construction_(tree->left);
 		create_thompson_construction_(tree->right);
 	}
+
+	// handling . operator
+	if (! strcmp(tree->val, ".")) {
+		tree->S.num_pointers = 1;
+		tree->S.points_at1 = &(tree->left->S);
+
+		// left child
+		tree->left->S.num_pointers = 1;
+		tree->left->S.points_at1 = &(tree->left->F);
+		tree->left->F.num_pointers = 1;
+		tree->left->F.points_at1 = &(tree->right->S);
+
+		// right child
+		tree->right->S.num_pointers = 1;
+		tree->right->S.points_at1 = &(tree->right->F);
+		tree->right->F.num_pointers = 1;
+		tree->right->F.points_at1 = &(tree->F);
+		
+		create_thompson_construction_(tree->left);
+		create_thompson_construction_(tree->right);
+	}
 }
 
 void reset_visited_set_indexes(_ANODE *node)
