@@ -24,7 +24,7 @@ class xlogger:
         print >> sys.stderr, term_colors.WARNING + str(msg) + term_colors.ENDC
 
     @staticmethod
-    def info(msg): 
+    def info(msg):
         """ Prints an info msg onto stderr """
         print >> sys.stderr, term_colors.OKBLUE + str(msg) + term_colors.ENDC
 
@@ -47,17 +47,17 @@ class algo_step:
 # -----------------------------------------------------------------------------
 class Edge:
     def __init__(self, end_node, weight):
-        """ 
-        Initializes edge object. 
+        """
+        Initializes edge object.
         end_node    -> string
-        weight      -> string 
+        weight      -> string
         """
         self.end_node = str(end_node)
         self.weight = str(weight)
 
     def __str__(self):
         return "(" + str(self.end_node) + ", " + str(self.weight) + ")"
-    
+
     def __eq__(self, other):
         if self.end_node == other.end_node and self.weight == other.weight:
             return True
@@ -74,7 +74,7 @@ class Node:
 
     def __str__(self):
         if self.is_ending:
-            return "(" + str(self.node_val) + ")" 
+            return "(" + str(self.node_val) + ")"
         else:
             return str(self.node_val)
 # When reading thomhpson's graph from .gv file, we KNOW that
@@ -149,12 +149,15 @@ class Graph:
         self.determinize()
 
     # -------------------------------------------------------------------------
-    def export_as_gv(self, algstep): 
+    def export_as_gv(self, algstep):
         """
         Maps Graph object as gv file.
         """
         output_text = []
         output_text.append("digraph finite_state_machine {\n")
+        output_text.append("graph [fontname = \"lmroman12\"];\n")
+        output_text.append("node [fontname = \"lmroman12\"];\n")
+        output_text.append("edge [fontname = \"lmroman12\"];\n")
         output_text.append("\trankdir=LR;\n")
         output_text.append("\tsize=\"8,5\"\n")
         output_text.append("\tnode [shape = doublecircle]; ")
@@ -166,7 +169,7 @@ class Graph:
 
         output_text[-1] = ";\n"
         output_text.append("\tnode [shape = circle];\n")
-        
+
         # lets fill in the elements
         nodes = self.graph_map.keys()
         for node in nodes:
@@ -179,7 +182,7 @@ class Graph:
                 output_text.append("\n")
 
         output_text.append("}")
-        
+
         # writing into file
         f = open(self.graph_name + str(algstep) + ".gv", "w")
         # f = open("tester.gv", "w")
@@ -233,11 +236,11 @@ class Graph:
         Recursive method that peforms a DFS search and eliminates epsilon edges.
         """
         visited[root_node][current_node] = True
-        
+
         if current_node in self.ending_nodes:
-            ending_nodes.append(root_node)     
+            ending_nodes.append(root_node)
             return
-        
+
         for adj in self.graph_map[current_node]:
             if adj.weight == "eps" and not visited[root_node][int(adj.end_node)]:
                 self.solve_eps_prob(root_node, int(adj.end_node), new_map, visited, ending_nodes)
@@ -282,7 +285,7 @@ class Graph:
 
             # update a map row if required for new deterministic nodes
             self.update_new_map_row(current_node, adjacent_nodes, new_map, queue)
-                    
+
         xlogger.fine("Determinized graph:")
         for key in new_map.keys():
             print str(key) + "->"
@@ -296,7 +299,7 @@ class Graph:
     # ----------------------------------------------------------------------
     # Used by method: determinize
     # ----------------------------------------------------------------------
-    def update_new_map_row(self, current_node, adjacent_nodes, new_map, queue): 
+    def update_new_map_row(self, current_node, adjacent_nodes, new_map, queue):
         """
         Used as a helper function in determinsation algorithm.
         It initialises and transforms some things in main graph object.
@@ -343,7 +346,20 @@ class Graph:
         [1, 2, 3] => "1,2,3"
         """
         print
-        xlogger.dbg("Converting " + str(nodelist) + " into string")
+
+        # xlogger.dbg("list_to_string:")
+        # xlogger.dbg("nodelist: " + str(nodelist))
+        # tmp = []
+        # for elem in nodelist:
+            # tmp.append(int(elem))
+        # tmp.sort()
+        # nodelist = []
+        # for elem in tmp:
+            # nodelist.append(str(elem))
+        # xlogger.dbg("nodelist: " + str(nodelist))
+
+        # nodelist.sort()
+        # xlogger.dbg("Converting " + str(nodelist) + " into string")
         res = []
         for elem in nodelist:
             res.append(str(elem))
@@ -364,6 +380,18 @@ class Graph:
             nodestr = nodestr.split(",")[0:-1]
         else:
             nodestr = nodestr.split(",")
+
+        tmp = []
+        xlogger.dbg("string_to_list: ")
+        xlogger.dbg("nodestr: " + str(nodestr))
+        for elem in nodestr:
+            tmp.append(int(elem))
+        tmp.sort()
+        nodestr = []
+        for elem in tmp:
+            nodestr.append(str(elem))
+        xlogger.dbg("nodestr: " + str(nodestr))
+
         return nodestr
 
     # ----------------------------------------------------------------------
@@ -372,7 +400,7 @@ class Graph:
     def find_adjacent_nodes(self, current_node):
         """
         Used as a helper function in determinsation algorithm.
-        It finds adjacent nodes for a given node. 
+        It finds adjacent nodes for a given node.
         """
         xlogger.info("Entered find_adjacent_nodes with current_node = " + str(current_node))
         # current node can be something like: "0,3,5"
@@ -402,7 +430,7 @@ class Graph:
         onto a main graph map used for storing a graph.
         It also sets ending nodes.
         """
-        ending_nodes = []        
+        ending_nodes = []
         self.graph_map.clear()
         graph_nodes = new_map.keys()
         for node in graph_nodes:
@@ -422,7 +450,6 @@ class Graph:
                 if int(elem) in self.ending_nodes:
                     ending_nodes.append(str(node))
                     break
-        
 
         xlogger.info("old ending nodes: " + str(self.ending_nodes))
         xlogger.info("new ending nodes: " + str(ending_nodes))
@@ -436,8 +463,6 @@ class Graph:
             for edge in new_map[node]:
                 if not edge[1] in graph_nodes:
                     self.graph_map[edge[1]] = []
-                
-        
 
         # Finally, we form the ending nodes in Graph object
         self.ending_nodes = ending_nodes
