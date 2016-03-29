@@ -347,19 +347,6 @@ class Graph:
         """
         print
 
-        # xlogger.dbg("list_to_string:")
-        # xlogger.dbg("nodelist: " + str(nodelist))
-        # tmp = []
-        # for elem in nodelist:
-            # tmp.append(int(elem))
-        # tmp.sort()
-        # nodelist = []
-        # for elem in tmp:
-            # nodelist.append(str(elem))
-        # xlogger.dbg("nodelist: " + str(nodelist))
-
-        # nodelist.sort()
-        # xlogger.dbg("Converting " + str(nodelist) + " into string")
         res = []
         for elem in nodelist:
             res.append(str(elem))
@@ -373,6 +360,7 @@ class Graph:
     def string_to_list(self, nodestr):
         """
         Converts a , separated string into a list of strings.
+        It also sorts the list.
         "1,2,3" => [1, 2, 3]
         "ab,cd" => ["ab", "cd"]
         """
