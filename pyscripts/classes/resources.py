@@ -2,7 +2,7 @@ import re, os, sys
 from Queue import Queue
 # -----------------------------------------------------------------------------
 class term_colors:
-    # Usage: print term_colors.WARNING + "This is a msg" + term_colors.ENDC
+    """ Usage: print term_colors.WARNING + "This is a msg" + term_colors.ENDC """
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKGREEN = '\033[92m'
@@ -12,23 +12,26 @@ class term_colors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 # -----------------------------------------------------------------------------
-class xdebug:
+class xlogger:
     @staticmethod
     def dbg(msg):
+        """ Prints a debugging msg onto stderr """
         print >> sys.stderr, term_colors.FAIL + str(msg) + term_colors.ENDC
 
     @staticmethod
     def warn(msg):
+        """ Prints a warning msg onto stderr """
         print >> sys.stderr, term_colors.WARNING + str(msg) + term_colors.ENDC
 
     @staticmethod
     def info(msg): 
+        """ Prints an info msg onto stderr """
         print >> sys.stderr, term_colors.OKBLUE + str(msg) + term_colors.ENDC
 
     @staticmethod
     def fine(msg):
+        """ Prints an ok msg onto stderr """
         print >> sys.stderr, term_colors.OKGREEN + str(msg) + term_colors.ENDC
-
 # -----------------------------------------------------------------------------
 # handy macro
 class algo_step:
@@ -44,6 +47,11 @@ class algo_step:
 # -----------------------------------------------------------------------------
 class Edge:
     def __init__(self, end_node, weight):
+        """ 
+        Initializes edge object. 
+        end_node    -> string
+        weight      -> string 
+        """
         self.end_node = str(end_node)
         self.weight = str(weight)
 
@@ -70,7 +78,8 @@ class Node:
         else:
             return str(self.node_val)
 # When reading thomhpson's graph from .gv file, we KNOW that
-# node 1 is ENDING state, because that's how Thompson's algorithm was implemented.
+# node 1 is ENDING state, because that's how Thompson's algorithm was implemented
+# for this particular project.
 # -----------------------------------------------------------------------------
 class Graph:
     # -------------------------------------------------------------------------
@@ -89,6 +98,10 @@ class Graph:
 
     # -------------------------------------------------------------------------
     def form_graph_from_gv(self):
+        """
+        Reads the .gv file that represent the graph
+        and maps it onto Graph object.
+        """
         print "reading graph: " + self.graph_name
         # algo_step.thompson because python continues where C stopped with work
         #  => Thompson algorithm has been performed
@@ -137,6 +150,9 @@ class Graph:
 
     # -------------------------------------------------------------------------
     def export_as_gv(self, algstep): 
+        """
+        Maps Graph object as gv file.
+        """
         output_text = []
         output_text.append("digraph finite_state_machine {\n")
         output_text.append("\trankdir=LR;\n")
@@ -175,6 +191,11 @@ class Graph:
     # command is:
     # dot -Tpdf ../../graphs/source_file.gv -o ../../graphs/output.pdf
     def export_as_pdf(self, algstep):
+        """
+        Draw a vector image of graph that it reads
+        from gv file (make sure you have it created).
+        Uses dot from graphviz to acomplish this amazing task.
+        """
         graph_id = self.graph_name.split("_")[0]
 
         output_name = self.graph_name + str(algstep)
@@ -184,9 +205,10 @@ class Graph:
 
     # -------------------------------------------------------------------------
     def elim_eps(self):
-        print
-        print "starting eps elimination:"
-
+        """
+        Performs algorithm that eliminates epsilon edges in graph.
+        Wrapper for solve_eps_prob.
+        """
         new_map = {0: []}
         new_ending_nodes = []
         visited_nodes = {0: False}
@@ -203,10 +225,13 @@ class Graph:
         self.ending_nodes = new_ending_nodes
         self.export_as_gv(algo_step.elimeps)
         self.export_as_pdf(algo_step.elimeps)
-        xdebug.fine("Exported: " + self.graph_name + algo_step.elimeps + ".gv")
-        xdebug.fine("Exported: " + self.graph_name + algo_step.elimeps + ".pdf")
+        xlogger.fine("Exported: " + self.graph_name + algo_step.elimeps + ".gv")
+        xlogger.fine("Exported: " + self.graph_name + algo_step.elimeps + ".pdf")
     # -------------------------------------------------------------------------
     def solve_eps_prob(self, root_node, current_node, new_map, visited, ending_nodes):
+        """
+        Recursive method that peforms a DFS search and eliminates epsilon edges.
+        """
         visited[root_node][current_node] = True
         
         if current_node in self.ending_nodes:
@@ -228,6 +253,9 @@ class Graph:
 
     # -------------------------------------------------------------------------
     def determinize(self):
+        """
+        Performs the determinisation algorithm.
+        """
         # we switch to string keys because of new states
         queue = Queue()            # queue.get() queue.put(item)
         queue.put("0")             # 0 is always the starting node
@@ -237,25 +265,25 @@ class Graph:
         while queue.qsize() > 0:
             print
             print "----------------------------------------------------------"
-            xdebug.info("Queue state: " + str([item for item in queue.queue]))
+            xlogger.info("Queue state: " + str([item for item in queue.queue]))
             print "----------------------------------------------------------"
 
             current_node = queue.get()
-            xdebug.info("Took " + str(current_node) + " from queue.")
+            xlogger.info("Took " + str(current_node) + " from queue.")
 
             # find all adjacent vertices
             # gives something like: "1,2,3"
 
             # gives a hash map like:
             # str(a) -> set(int(1), ...)  str(b) -> set(int(5), int(6), int(7))
-            xdebug.info("Calling find_adjacent_nodes with " + str(current_node))
+            xlogger.info("Calling find_adjacent_nodes with " + str(current_node))
             adjacent_nodes = self.find_adjacent_nodes(current_node)
-            xdebug.info("Adjacent nodes: " + str(adjacent_nodes))
+            xlogger.info("Adjacent nodes: " + str(adjacent_nodes))
 
             # update a map row if required for new deterministic nodes
             self.update_new_map_row(current_node, adjacent_nodes, new_map, queue)
                     
-        xdebug.fine("Determinized graph:")
+        xlogger.fine("Determinized graph:")
         for key in new_map.keys():
             print str(key) + "->"
             for elem in new_map[key]:
@@ -269,6 +297,10 @@ class Graph:
     # Used by method: determinize
     # ----------------------------------------------------------------------
     def update_new_map_row(self, current_node, adjacent_nodes, new_map, queue): 
+        """
+        Used as a helper function in determinsation algorithm.
+        It initialises and transforms some things in main graph object.
+        """
         # For each weight in array
         for weight in adjacent_nodes.keys():
             # --------------------------------------------------------------
@@ -281,21 +313,12 @@ class Graph:
                 new_node.append(str(elem))
                 new_node.append(",")
             new_node = "".join(new_node)[0:-1]  # cut , at the end
-            xdebug.info("formed string: " + new_node)
-
-            # TODO: Del this later
-                ## forming edge if required after loop
-                # xdebug.warn("elem: " + str(elem))
-                # if elem in self.graph_map:
-                    # xdebug.dbg("YES")
-                    # for edge in self.graph_map[elem]:
-                        # new_edges.append(edge.end_node)
-                # xdebug.dbg("new_edges: " + str(new_edges)) 
+            xlogger.info("formed string: " + new_node)
 
             # --------------------------------------------------------------
             elem = self.list_to_string(adjacent_nodes[weight])
-            xdebug.info("result from [a] -> str: " + str(elem))
-            xdebug.info("type(" + str(elem) + " is " + str(type(elem)))
+            xlogger.info("result from [a] -> str: " + str(elem))
+            xlogger.info("type(" + str(elem) + " is " + str(type(elem)))
             # new_map[current_node] = elem
 
             if not current_node in new_map:
@@ -308,30 +331,35 @@ class Graph:
             print type(new_node)
             if not new_node in new_map.keys():
                 ## adding into queue
-                xdebug.info("adding into queue: " + str(new_node))
+                xlogger.info("adding into queue: " + str(new_node))
                 queue.put(new_node)
                 ## updating
                 # new_map[new_node] = []
 
     # ----------------------------------------------------------------------
-    # [1, 2, 3] => "1,2,3"
-    # ----------------------------------------------------------------------
     def list_to_string(self, nodelist):
+        """
+        Converts a list of elements onto string with character ',' as separator
+        [1, 2, 3] => "1,2,3"
+        """
         print
-        xdebug.dbg("Converting " + str(nodelist) + " into string")
+        xlogger.dbg("Converting " + str(nodelist) + " into string")
         res = []
         for elem in nodelist:
             res.append(str(elem))
             res.append(",")
         res = "".join(res)[0:-1]  # cut , at the end
-        xdebug.dbg("Done conversion: " + str(res))
+        xlogger.dbg("Done conversion: " + str(res))
         print
         return res
 
     # ----------------------------------------------------------------------
-    # "1,2,3" => [1, 2, 3]
-    # ----------------------------------------------------------------------
     def string_to_list(self, nodestr):
+        """
+        Converts a , separated string into a list of strings.
+        "1,2,3" => [1, 2, 3]
+        "ab,cd" => ["ab", "cd"]
+        """
         if nodestr[-1] == ",":
             nodestr = nodestr.split(",")[0:-1]
         else:
@@ -342,19 +370,23 @@ class Graph:
     # Used by method: determinize
     # ----------------------------------------------------------------------
     def find_adjacent_nodes(self, current_node):
-        xdebug.info("Entered find_adjacent_nodes with current_node = " + str(current_node))
+        """
+        Used as a helper function in determinsation algorithm.
+        It finds adjacent nodes for a given node. 
+        """
+        xlogger.info("Entered find_adjacent_nodes with current_node = " + str(current_node))
         # current node can be something like: "0,3,5"
         adjacent_nodes = {}     # example: a -> "1,2,3" b -> "3,4,5"
 
         # [1, 2, 3] -> "1,2,3"
-        xdebug.dbg("calling conversion for: " + str(current_node))
+        xlogger.dbg("calling conversion for: " + str(current_node))
         current_node = self.string_to_list(current_node)
-        xdebug.info("updated current_node, current_node = " + str(current_node))
+        xlogger.info("updated current_node, current_node = " + str(current_node))
 
         # ['0', '3', '5] -> '0',   '3',  '5'
-        xdebug.dbg("current node: " + str(current_node))
+        xlogger.dbg("current node: " + str(current_node))
         for node in current_node:
-            xdebug.dbg("node: " + str(node))
+            xlogger.dbg("node: " + str(node))
             if int(node) in self.graph_map.keys():
                 for edge in self.graph_map[int(node)]:
                     if edge.weight not in adjacent_nodes:
@@ -365,6 +397,11 @@ class Graph:
 
     # ----------------------------------------------------------------------
     def convert_into_object_map(self, new_map):
+        """
+        Converts a temp hash map created during determinisation algorithm
+        onto a main graph map used for storing a graph.
+        It also sets ending nodes.
+        """
         ending_nodes = []        
         self.graph_map.clear()
         graph_nodes = new_map.keys()
@@ -381,14 +418,14 @@ class Graph:
         for node in self.graph_map.keys():
             nodez = self.string_to_list(node)
             for elem in nodez:
-                xdebug.dbg("elem: " + str(elem))
+                xlogger.dbg("elem: " + str(elem))
                 if int(elem) in self.ending_nodes:
                     ending_nodes.append(str(node))
                     break
         
 
-        xdebug.info("old ending nodes: " + str(self.ending_nodes))
-        xdebug.info("new ending nodes: " + str(ending_nodes))
+        xlogger.info("old ending nodes: " + str(self.ending_nodes))
+        xlogger.info("new ending nodes: " + str(ending_nodes))
 
         # adding nodes that don't have an output edge
         # currently, they are implicitly given in our graph structure
@@ -411,6 +448,9 @@ class Graph:
 
     # ----------------------------------------------------------------------
     def show_graph(self):
+        """
+        Prints graph to stdout.
+        """
         for node in self.graph_map.keys():
             print node
             for edge in self.graph_map[node]:
@@ -418,6 +458,10 @@ class Graph:
 
     # ----------------------------------------------------------------------
     # TODO: Nexto to implement
+    # ----------------------------------------------------------------------
     def minimize():
+        """
+        Performs minimization algorithm.
+        """
         return 1
 # -----------------------------------------------------------------------------
