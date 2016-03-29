@@ -30,6 +30,13 @@ class xdebug:
         print >> sys.stderr, term_colors.OKGREEN + str(msg) + term_colors.ENDC
 
 # -----------------------------------------------------------------------------
+# handy macro
+class algo_step:
+    thompson = "_01_thompson"
+    elimeps = "_02_elimeps"
+    determ = "_03_determ"
+    minim = "_04_minim"
+# -----------------------------------------------------------------------------
 # VERY IMPORTANT:
 # -----------------------------------------------------------------------------
 # I changed type of end_node into STRING type, if error occurs BEFORE determinisation,
@@ -83,7 +90,9 @@ class Graph:
     # -------------------------------------------------------------------------
     def form_graph_from_gv(self):
         print "reading graph: " + self.graph_name
-        f = open("../graphs/" + self.graph_name, "r")
+        # algo_step.thompson because python continues where C stopped with work
+        #  => Thompson algorithm has been performed
+        f = open("../graphs/" + self.graph_name + algo_step.thompson + ".gv", "r")
         data = f.read()
         f.close()
         print "Graph data:"
@@ -127,14 +136,16 @@ class Graph:
         self.determinize()
 
     # -------------------------------------------------------------------------
-    def export_as_gv(self): 
+    def export_as_gv(self, algstep): 
         output_text = []
         output_text.append("digraph finite_state_machine {\n")
         output_text.append("\trankdir=LR;\n")
         output_text.append("\tsize=\"8,5\"\n")
         output_text.append("\tnode [shape = doublecircle]; ")
         for node in self.ending_nodes:
+            output_text.append("\"")
             output_text.append(str(node))
+            output_text.append("\"")
             output_text.append(",")
 
         output_text[-1] = ";\n"
@@ -154,7 +165,8 @@ class Graph:
         output_text.append("}")
         
         # writing into file
-        f = open("tester.gv", "w")
+        f = open(self.graph_name + str(algstep) + ".gv", "w")
+        # f = open("tester.gv", "w")
         f.write("".join(output_text))
         f.close()
 
@@ -162,22 +174,11 @@ class Graph:
     # Export graph structure as pdf
     # command is:
     # dot -Tpdf ../../graphs/source_file.gv -o ../../graphs/output.pdf
-    def export_as_pdf(self, step):
+    def export_as_pdf(self, algstep):
         graph_id = self.graph_name.split("_")[0]
-        if step == 1:
-            algo = "thompson"
-        elif step == 2:
-            algo = "elimeps"
-        elif step == 3:
-            algo = "determ"
-        elif step == 4:
-            algo = "minim"
-        else:
-            print "error in export_as_pdf function, wrong step argument (allowed 1, 2, 3, 4), given " + str(step)
-            sys.exit(1) 
 
-        output_name = graph_id + "_" + str(step) + "_" + algo + ".pdf"
-        os.system("dot -Tpdf tester.gv -o output.pdf")
+        output_name = self.graph_name + str(algstep)
+        os.system("dot -Tpdf " + output_name + ".gv -o " + output_name + ".pdf")
         return 1
 
 
@@ -200,10 +201,10 @@ class Graph:
 
         self.graph_map = new_map
         self.ending_nodes = new_ending_nodes
-        self.export_as_gv()
-        self.export_as_pdf(2)
-        print "Exported as .gv and .pdf"
-        print
+        self.export_as_gv(algo_step.elimeps)
+        self.export_as_pdf(algo_step.elimeps)
+        xdebug.fine("Exported: " + self.graph_name + algo_step.elimeps + ".gv")
+        xdebug.fine("Exported: " + self.graph_name + algo_step.elimeps + ".pdf")
     # -------------------------------------------------------------------------
     def solve_eps_prob(self, root_node, current_node, new_map, visited, ending_nodes):
         visited[root_node][current_node] = True
@@ -261,10 +262,8 @@ class Graph:
                 print "---->" + str(elem)
 
         self.convert_into_object_map(new_map)
-        self.export_as_gv()
-        self.export_as_pdf(3)
-
-        return 1
+        self.export_as_gv(algo_step.determ)
+        self.export_as_pdf(algo_step.determ)
 
     # ----------------------------------------------------------------------
     # Used by method: determinize
@@ -294,7 +293,7 @@ class Graph:
                 # xdebug.dbg("new_edges: " + str(new_edges)) 
 
             # --------------------------------------------------------------
-            elem = self.convert_node_list_to_string(adjacent_nodes[weight])
+            elem = self.list_to_string(adjacent_nodes[weight])
             xdebug.info("result from [a] -> str: " + str(elem))
             xdebug.info("type(" + str(elem) + " is " + str(type(elem)))
             # new_map[current_node] = elem
@@ -317,7 +316,7 @@ class Graph:
     # ----------------------------------------------------------------------
     # [1, 2, 3] => "1,2,3"
     # ----------------------------------------------------------------------
-    def convert_node_list_to_string(self, nodelist):
+    def list_to_string(self, nodelist):
         print
         xdebug.dbg("Converting " + str(nodelist) + " into string")
         res = []
@@ -332,7 +331,7 @@ class Graph:
     # ----------------------------------------------------------------------
     # "1,2,3" => [1, 2, 3]
     # ----------------------------------------------------------------------
-    def convert_string_nodes_to_list(self, nodestr):
+    def string_to_list(self, nodestr):
         if nodestr[-1] == ",":
             nodestr = nodestr.split(",")[0:-1]
         else:
@@ -349,7 +348,7 @@ class Graph:
 
         # [1, 2, 3] -> "1,2,3"
         xdebug.dbg("calling conversion for: " + str(current_node))
-        current_node = self.convert_string_nodes_to_list(current_node)
+        current_node = self.string_to_list(current_node)
         xdebug.info("updated current_node, current_node = " + str(current_node))
 
         # ['0', '3', '5] -> '0',   '3',  '5'
@@ -365,28 +364,46 @@ class Graph:
         return adjacent_nodes
 
     # ----------------------------------------------------------------------
-    # TODO
     def convert_into_object_map(self, new_map):
-        # We need to rename 
-        xdebug.info("old ending nodes: " + str(self.ending_nodes))
         ending_nodes = []        
         self.graph_map.clear()
-        for node in new_map.keys():
-            # updating object map
+        graph_nodes = new_map.keys()
+        for node in graph_nodes:
             self.graph_map[node] = []
             for edge in new_map[node]:
-                # ('a', '1,2,3')
+                # ('1,2,3', 'a')
                 self.graph_map[node].append(Edge(edge[1], edge[0]))
+                if not edge[1] in graph_nodes:
+                    self.graph_map[edge[1]] = []
 
-            # finding ending nodes
-            # TODO: Fix ending nodes
-            nodes = self.convert_string_nodes_to_list(node)
-            xdebug.info("str->lst: nodes: " + str(nodes))
-            for xnode in nodes:
-                if int(xnode) in self.ending_nodes:
-                    ending_nodes.append(node)
+        # finding ending nodes
+        # node => "11,3" for example
+        for node in self.graph_map.keys():
+            nodez = self.string_to_list(node)
+            for elem in nodez:
+                xdebug.dbg("elem: " + str(elem))
+                if int(elem) in self.ending_nodes:
+                    ending_nodes.append(str(node))
                     break
-            self.ending_nodes = ending_nodes
+        
+
+        xdebug.info("old ending nodes: " + str(self.ending_nodes))
+        xdebug.info("new ending nodes: " + str(ending_nodes))
+
+        # adding nodes that don't have an output edge
+        # currently, they are implicitly given in our graph structure
+        # they appear only in edges in map (example: 3 has no output edge)
+        # For example, "1,2" -> ("ab", "3")
+        # Lets find nodes like this and add them into main map
+        for node in graph_nodes:
+            for edge in new_map[node]:
+                if not edge[1] in graph_nodes:
+                    self.graph_map[edge[1]] = []
+                
+        
+
+        # Finally, we form the ending nodes in Graph object
+        self.ending_nodes = ending_nodes
 
         print
         self.show_graph()
@@ -400,16 +417,7 @@ class Graph:
                 print " -> " + str(edge)
 
     # ----------------------------------------------------------------------
-    def break_info_nodes(nodes):
-        return nodes.split(",")[0:-1]
-
-    # ----------------------------------------------------------------------
     # TODO: Nexto to implement
     def minimize():
         return 1
 # -----------------------------------------------------------------------------
-
-
-
-
-
