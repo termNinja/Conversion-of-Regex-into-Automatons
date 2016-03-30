@@ -7,7 +7,6 @@ void nova_show_help_menu()
 	printf("\tOR operator -> |\n");
 	printf("\tCLEENE operator -> *\n");
 	printf(GREEN "Example: (a|b)|(c|d)*\n\n");
-
 	printf("vars;\t\t -> shows memory and variables.\n");
 	printf("clear;\t\t -> clears the screen.\n");
 	printf("print E;\t -> shows expression value.\n");
@@ -15,7 +14,6 @@ void nova_show_help_menu()
 	printf("E;\t\t -> shows expression value.\n");
 	printf("x := E;\t\t -> Create/redefine variable x as regex E.\n");
 	printf(RED "\t\tVariable name must start with $ (like in PHP).\n");
-
 	printf("\n" RESET);
 }
 
@@ -50,6 +48,9 @@ void nova_export_thompson(_REGEX *regex, int filenum)
 	}
 	
 	fprintf(f, "digraph finite_state_machine {\n");
+	fprintf(f, "graph [fontname = \"lmroman12\"];\n");
+	fprintf(f, "node [fontname = \"lmroman12\"];\n");
+	fprintf(f, "edge [fontname = \"lmroman12\"];\n");
 	fprintf(f, "\trankdir=LR;\n");
 	fprintf(f, "\tsize=\"8,5\"\n");
 	fprintf(f, "\tnode [shape = doublecircle]; 1;\n");
@@ -79,7 +80,6 @@ void reset_nodes(_REGNODE *regex)
 		reset_nodes(regex->right);
 }
 
-// TODO reset variable VISITED
 void generate_thompson(FILE *f, _ANODE *node)
 {
 	// we mark the current node as visited
