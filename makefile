@@ -9,6 +9,8 @@ AS		= -o
 YACC	= yacc -d
 LEX		= flex
 PFiles  = *.c *.h *.l *.y pyscripts graphs
+CPart 	= *.c *.h *.l *.y
+PyPart  = pyscripts/pygraph.py pyscripts/classes/resources.py
 # -----------------------------------------------------------------------------
 # GOAL
 # -----------------------------------------------------------------------------
@@ -45,7 +47,7 @@ lex.yy.c: lexer.l
 # -----------------------------------------------------------------------------
 # Additional stuff
 # -----------------------------------------------------------------------------
-.PHONY: help clear dance lines dist
+.PHONY: help clean dance lines dist genexmaples
 
 help:
 	@echo "make help 	-> shows help menu"
@@ -53,7 +55,7 @@ help:
 	@echo "make dance 	-> performs a dance"
 	@echo "make lines 	-> counts file lines"
 
-clear:
+clean:
 	@rm -rf *~ *.o lex.yy.* $(GOAL) y.tab.*
 	@clear
 	@echo "Project dir has been cleaned sire!"
@@ -68,7 +70,14 @@ dist:
 lines:
 	@make clear
 	@echo "C files:"
-	@wc -l *.c *.h *.y *.l 
+	@wc -l $(CPart) 
 	@echo
 	@echo "Python files:"
-	@wc -l pyscripts/pygraph.py pyscripts/classes/resources.py
+	@wc -l $(PyPart)
+	@echo
+	@echo "All files:"
+	@wc -l $(CPart) $(PyPart) | grep total
+
+genexamples:
+	@./$(GOAL) < examples.txt
+	@echo "Examples saved at graphs/"
