@@ -50,6 +50,7 @@ void create_thompson_construction_(_REGNODE* tree);
 
 /* Other stuff */
 void check_alloc(_REGNODE* node, char *msg);
+
 // void perform_dfs(_ANODE *node);
 void reset_visited_set_indexes(_ANODE *node);
 
