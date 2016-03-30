@@ -1,5 +1,6 @@
 #include "regex.h"
 
+// TODO: Refactor this 
 _REGNODE* regnode_new_node(char* val)
 {
 	_REGNODE* node = (_REGNODE*) malloc (sizeof(_REGNODE));
@@ -74,6 +75,7 @@ void create_thompson_construction(_REGNODE* tree)
 }
 
 // TODO is variable num_pointers needed? Marked it for later -> UPDATE: NOT NEEDED, remove it later
+// TODO: Refactor this 
 void create_thompson_construction_(_REGNODE* tree)
 {
 	tree->S.index = global_INDEX;
