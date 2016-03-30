@@ -1,0 +1,14 @@
+thompson a;
+thompson a|b;
+thompson a*;
+thompson (a|b)*;
+thompson (a|b)|(a|b);
+thompson ((a|b)|(a|b))*;
+thompson (((a|b)*)*)|((a|b|c|d));
+thompson (a|b)|(a|b)|(a|b)*;
+thompson ((zdravo|svete)*)|((regex|ftw)*)*;
+thompson (a|b).((a|b)*).b.a;
+thompson na.vrh.vrba.drda.brda;
+thompson ((na.vrh)|(vrba.drda))*;
+thompson (na.vrh.(brda|mrda|drda).(mrda|vrba|drda).(vrba|brda|drda))*;
+thompson profesore.nadamo.se.da.Vam.se.svidja.seminarski;
