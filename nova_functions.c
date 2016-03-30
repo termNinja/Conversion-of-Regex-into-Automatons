@@ -91,7 +91,8 @@ void generate_thompson(FILE *f, _ANODE *node)
 		if (strcmp(*(node->val), *(node->points_at1->val)) == 0 
 			&& node->node_type == INPUT_NODE
 			&& strcmp("|", *(node->val)) != 0 
-			&& strcmp("*", *(node->val)) != 0) {
+			&& strcmp("*", *(node->val)) != 0
+			&& strcmp(".", *(node->val)) != 0) {
 				fprintf(f, " [label=\"%s\"];", *(node->val));
 		}
 		fprintf(f, "\n");
@@ -108,7 +109,8 @@ void generate_thompson(FILE *f, _ANODE *node)
 		if (strcmp(*(node->val), *(node->points_at2->val)) == 0 
 			&& node->node_type == INPUT_NODE
 			&& strcmp("|", *(node->val)) != 0 
-			&& strcmp("*", *(node->val)) != 0) {
+			&& strcmp("*", *(node->val)) != 0
+			&& strcmp(".", *(node->val)) != 0) {
 				fprintf(f, " [label=\"%s\"];", *(node->val));
 		}
 		fprintf(f, "\n");
