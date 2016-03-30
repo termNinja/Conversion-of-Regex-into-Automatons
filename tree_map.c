@@ -1,11 +1,5 @@
 #include "tree_map.h"
 
-// typedef struct _treenode {
-// 	_REGEX regex;
-// 	struct _treenode *left, *right;
-// 	char* name;
-// } _TREENODE;
-
 _TREENODE* tree_new_node(_REGEX* regex, char *name)
 {
 	_TREENODE* node = (_TREENODE*) malloc (sizeof(_TREENODE));
@@ -77,4 +71,3 @@ void tree_show_tree(_TREENODE *tree)
 		tree_show_tree(tree->right);
 	}
 }
-
